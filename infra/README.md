@@ -1,11 +1,16 @@
 # Infrastructure
 
-Reviewable AWS resource/IAM/network/storage/state/observability provisioning.
+IMPLEMENTED trong repo: Terraform bootstrap/controller, tenant platform composition
+và data_plane module. AWS deployment UNVERIFIED.
 
-Trạng thái: PROPOSED boundary; documentation foundation, chưa có runtime/config executable.
+- [Bootstrap](terraform/bootstrap/main.tf): remote state/artifacts, CI roles/boundary,
+  CodePipeline/CodeBuild và optional dedicated-account management audit.
+- [Platform](terraform/platform/main.tf): một deployment/tenant/environment.
+- [Data plane](terraform/modules/data_plane/main.tf): compute/storage/network/workflow;
+  serving/monitoring trong cùng module.
+- [CDK extension](cdk/README.md): input/output/artifact seam, chưa có CDK app.
+- [Terraform guide](../docs/devops/terraform-and-cdk.md) và
+  [deploy runbook](../docs/runbooks/devops-lab.md).
 
-- Common modules + tenant/environment composition; không fork infra/business logic theo hãng.
-- Chưa chọn IaC tool, AWS account/Region, isolation tier, compute/serving/state services hoặc budget.
-- Resource definitions tham chiếu workflow/job/dashboard/policy artifacts do module tương ứng sở hữu.
-- Plan/preview và schema impact review được trước apply; không tự tạo resources có phí.
-- Test negative access/routing/recovery/cleanup và backups; code rollback khác data recovery.
+Chưa chọn account/Region/budget/isolation tier thật. Chỉ plan/apply trong authorization;
+IaC code không phải bằng chứng resources đã tồn tại hoặc production-ready.

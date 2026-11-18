@@ -1,0 +1,19 @@
+{
+  "contract_version": "1",
+  "iac_engine": "terraform",
+  "project": "atdp",
+  "environment": "dev",
+  "tenant_id": "airline-a",
+  "region": "REPLACE_REGION",
+  "vpc_id": "REPLACE_VPC_ID",
+  "subnet_ids": ["REPLACE_PRIVATE_SUBNET_A", "REPLACE_PRIVATE_SUBNET_B"],
+  "route_table_ids": ["REPLACE_PRIVATE_ROUTE_TABLE"],
+  "sql_cidr": "10.20.1.0/24",
+  "sql_port": 1433,
+  "source_schema": "devops",
+  "source_table": "pilot_source",
+  "retention_days": 30,
+  "max_rows": 10000,
+  "schedule_enabled": false,
+  "schedule_expression": "rate(1 day)"
+}

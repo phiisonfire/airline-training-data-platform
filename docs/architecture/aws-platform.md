@@ -3,6 +3,10 @@
 Ngày: 2026-11-17. AWS và single-platform repo: ACCEPTED. Cấu trúc, service mapping
 và execution design dưới đây: PROPOSED, chưa IMPLEMENTED.
 
+Cập nhật 2026-11-18: [DevOps slice](../devops/architecture.md) đã có code/IaC/tests
+trong repo, cloud deployment UNVERIFIED. Blueprint đầy đủ dưới đây vẫn PROPOSED;
+service choices của slice không đồng nghĩa toàn bộ business platform đã implement.
+
 ## 1. Data flow và ownership
 
 ```mermaid

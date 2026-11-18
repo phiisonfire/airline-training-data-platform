@@ -1,11 +1,8 @@
 # Transformations
 
-Canonical/history models, identity/assignments, domain evaluation và analytical projections.
+IMPLEMENTED pure [mapping/filter](simple/pilots.py) cho synthetic devops snapshot:
+source_id → pilot_id, display_name → pilot_name, employmentdate → employment_date,
+chỉ chọn active rows và thêm trusted tenant/run context. DQ validation ở data_quality.
 
-Trạng thái: PROPOSED boundary; documentation foundation, chưa có runtime/config executable.
-
-- Tách canonicalization, domain calculations và daily Gold models về trách nhiệm; tổ chức submodules khi có code.
-- Flight revision/dedup/tombstone; LMS enrollment/exam và ETR attempt/section/item giữ grain riêng.
-- Qualification giữ rule version, evidence refs, missing/failed requirements và technical errors; không tự cấp certification.
-- Seniority dùng employmentdate/date, tenant policy version và explicit as-of; chưa là qualification condition.
-- Domain calculations không tự đọc SQL/HTTP/clock; engine/I/O đặt ở boundary phù hợp.
+Canonical history, qualification, seniority và Gold/BI models đầy đủ DEFERRED cho
+milestone DevOps. Không tự thay source semantics hoặc cấp qualification.

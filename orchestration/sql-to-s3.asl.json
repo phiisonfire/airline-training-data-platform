@@ -1,0 +1,23 @@
+{
+  "Comment": "Bounded SQL snapshot; execution name binds retries to immutable raw",
+  "StartAt": "Snapshot",
+  "TimeoutSeconds": 900,
+  "States": {
+    "Snapshot": {
+      "Type": "Task",
+      "Resource": "arn:${partition}:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${worker_alias_arn}",
+        "Payload": {"run_id.$": "$$.Execution.Name"}
+      },
+      "OutputPath": "$.Payload",
+      "Retry": [{
+        "ErrorEquals": ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException", "Lambda.TooManyRequestsException"],
+        "IntervalSeconds": 2,
+        "BackoffRate": 2,
+        "MaxAttempts": 3
+      }],
+      "End": true
+    }
+  }
+}

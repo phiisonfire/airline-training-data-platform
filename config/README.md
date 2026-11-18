@@ -1,11 +1,10 @@
 # Configuration
 
-Versioned environment/tenant bindings và synthetic policy examples.
+[Example](examples/devops-lab.json) có placeholders, intentionally không deploy được.
+Copy sang `config/deployment.json`, điền non-secret account/network/source refs và
+commit reviewed config cho CodePipeline. Schema từ chối password/unknown fields.
 
-Trạng thái: PROPOSED boundary; documentation foundation, chưa có runtime/config executable.
-
-- Trusted tenant binding khai báo source/target resource refs, isolation tier, release và policy references.
-- Chỉ commit schemas, synthetic examples và secret references; không credentials, connection URLs hoặc real PII.
-- Custom policies thực tế giữ trong tenant boundary; không đưa nội dung policy của hãng vào shared control metadata.
-- Không fallback tenant/pilot/policy; detect missing/overlapping configuration trước writes.
-- Account/Region/budget và target write authority chưa được chọn.
+Tenant/state binding là trusted controller configuration; source event không đổi
+routing. Credentials chỉ trong Secrets Manager ngoài Terraform. Custom business
+policy contents thực tế không được copy vào shared control plane. AWS account/
+Region/budget và isolation tier thật vẫn cần xác nhận.

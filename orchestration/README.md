@@ -1,11 +1,9 @@
 # Orchestration
 
-Triggers, schedules, workflow dependencies và execution policies.
+IMPLEMENTED [Step Functions ASL](sql-to-s3.asl.json), Terraform bind worker alias và
+partition. EventBridge Scheduler disabled mặc định; SQS DLQ chỉ cho dispatch failure.
+Execution name là stable run_id; event không chọn tenant/source/target.
 
-Trạng thái: PROPOSED boundary; documentation foundation, chưa có runtime/config executable.
-
-- Workflows riêng cho ingestion, daily reporting, operational reevaluation/delivery và reconciliation.
-- Include time triggers cho expiry/rolling windows; không chỉ chờ CDC.
-- Workflow gọi pipeline entrypoints, áp dụng gate outputs; không duplicate transformations/DQ logic.
-- Retries cần idempotency và durable checkpoints; không che business/DQ failure thành successful publication.
-- Step Functions/EventBridge Scheduler là candidates, chưa có state machines/deployed schedules.
+Workflow gọi pipeline entrypoint; không chứa mapping/DQ code. Service invocation
+errors có bounded retries; application failures cần investigation/redrive. Full
+daily reporting/backfeed/time-trigger qualification workflows chưa implement.

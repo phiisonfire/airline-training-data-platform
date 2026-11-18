@@ -1,0 +1,27 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: '3.12'
+    commands:
+      - python -m pip install --require-hashes -r requirements-dev.lock
+      - python ci/install_terraform.py
+  build:
+    commands:
+      - python ci/package.py
+      - python ci/check_package.py
+      - python ci/check.py
+      - python -m pip_audit -r requirements.lock --no-deps --disable-pip
+      - python ci/iac.py validate
+artifacts:
+  files:
+    - '**/*'
+    - '**/.terraform.lock.hcl'
+  exclude-paths:
+    - '**/.terraform/**/*'
+    - '**/__pycache__/**/*'
+    - '.git/**/*'
+    - '.venv/**/*'
+    - 'build/package/**/*'
+    - '**/*.tfstate*'
+    - '**/deployment.auto.tfvars.json'

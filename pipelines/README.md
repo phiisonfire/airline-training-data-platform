@@ -1,11 +1,8 @@
 # Pipelines
 
-Application use cases end-to-end; phối hợp sources, transformations, DQ và targets.
+IMPLEMENTED [SQL to S3](sql_to_s3/job.py): full snapshot, raw checkpoint, DQ gate,
+column mapping/filter, immutable output và manifest-last publication. AWS handler
+ở `sql_to_s3/handler.py`. Không có business qualification engine hoặc SQL backfeed.
 
-Trạng thái: PROPOSED boundary; documentation foundation, chưa có runtime/config executable.
-
-- Các use cases: ingest source state; daily learning/qualification publication; current qualification backfeed; scoped replay/reconciliation.
-- Run context explicit: tenant binding, correlation, source checkpoints, versions và evaluation as-of.
-- Reporting/backfeed giữ checkpoint, retry và recovery riêng; backfeed không đợi daily Gold.
-- Historical backfill chỉ tạo analytical publication; muốn repair app phải reevaluate authoritative current state.
-- Không đặt SDK-specific workflow definitions hoặc business calculations trực tiếp ở đây.
+Retry cùng binding/run tái dùng raw; historical/current operational semantics của
+full platform vẫn giữ trong business requirements. [Runbook](../docs/runbooks/devops-lab.md).

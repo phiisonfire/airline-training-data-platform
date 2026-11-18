@@ -1,11 +1,9 @@
 # Data quality
 
-Contract/identity/relational/temporal/rule validators, issue semantics và reconciliation.
+IMPLEMENTED [snapshot validators](simple/pilots.py): exact fields/types, positive
+integer PK, uniqueness, nonblank name, BIT boolean và ISO DATE. Invalid inactive
+row vẫn block toàn snapshot. Missing/null/type errors không bị silent cast/repair.
 
-Trạng thái: PROPOSED boundary; documentation foundation, chưa có runtime/config executable.
-
-- Phân biệt missing/null/empty/wrong type/malformed; preserve intentionally bad raw.
-- Identity conflict, graph error và parse error không biến thành business fail hoặc qualified.
-- Issues có safe source refs, parser/contract version, affected scope và remediation/replay history trong tenant boundary.
-- Gate policy theo affected product và severity; orchestration consume kết quả validator.
-- Test raw fixtures và independent assertions; generator DQ labels chỉ là oracle riêng.
+Pipeline giữ raw, ghi quarantine safe row index/error code và không publish khi
+DQ fail. Identity/graph/training validators của full platform chưa implement.
+[Contract](../contracts/devops/pilot-snapshot.md).

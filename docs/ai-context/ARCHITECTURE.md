@@ -1,7 +1,7 @@
 # ARCHITECTURE — Proposed bootstrap
 
-Ngày baseline: 2026-11-17. **PROPOSED design**; repo đã khảo sát, chưa có runtime
-hoặc deployment evidence. AWS single-platform direction là ACCEPTED; service list chưa chốt.
+Ngày baseline: 2026-11-17; cập nhật 2026-11-18. Full business design vẫn **PROPOSED**;
+DevOps slice có code/IaC/tests trong repo, AWS deployment chưa kiểm chứng. AWS single-platform direction là ACCEPTED; service list chưa chốt.
 Repository boundaries: [AWS blueprint](../architecture/aws-platform.md);
 quyết định: [ADR 0001](../adr/0001-single-aws-platform.md).
 Business scope đã ACCEPTED nằm trong [BUSINESS_RULES.md](BUSINESS_RULES.md).
@@ -150,3 +150,23 @@ evaluation engine, physical data schemas, target SQL integration, isolation tier
 retention/scale/budget và operational SLO chưa chốt. ADR chỉ ghi ACCEPTED khi có
 quyết định thực tế. Khi có implementation, thêm module paths/commands/evidence
 đã kiểm chứng; không dùng diagram trên để khẳng định deployment tồn tại.
+
+## 8. DevOps milestone — IMPLEMENTED repo code, AWS UNVERIFIED
+
+Theo user scope ngày 2026-11-18, tạm dùng một synthetic SQL Server test table →
+bounded full snapshot → raw/DQ/mapping/filter → S3 JSONL/manifest. Python 3.12 Lambda,
+Step Functions/Scheduler, tenant S3/KMS/Secrets/IAM/network endpoints, Glue/Athena và
+CloudWatch/SNS/SQS được định nghĩa trong Terraform. Không dùng output này thay hai
+BI products hoặc qualification SQL backfeed; các nhánh business đó DEFERRED trong slice.
+
+CodePipeline/CodeBuild có build/plan/approval/apply/verify; bootstrap control plane
+state/authority khác platform. Apply exact saved plan với source/artifact/backend/
+boundary/TTL checks. Deployment JSON/output contract là seam để thêm AWS CDK; CDK
+chưa implement và không dual resource ownership. Terraform CLI/provider/dependencies
+được pin/lock. Password ngoài Terraform; owner seed initial remote backend riêng.
+
+Implementation/source contracts và commands: [DevOps guide](../devops/README.md),
+[ADR 0002](../adr/0002-devops-terraform-codepipeline.md),
+[runbook](../runbooks/devops-lab.md). Service choices của slice không chốt cloud
+account/Region/budget/isolation hoặc numeric business SLA. Actual access/network/
+SQL integration/recovery cần AWS evidence riêng.

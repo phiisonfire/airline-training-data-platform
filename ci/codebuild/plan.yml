@@ -1,0 +1,17 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      python: '3.12'
+    commands:
+      - python -m pip install --require-hashes -r requirements-dev.lock
+      - python ci/install_terraform.py
+  build:
+    commands:
+      - python ci/iac.py plan
+artifacts:
+  base-directory: build/plan
+  files:
+    - tfplan
+    - tfplan.txt
+    - metadata.json

@@ -69,6 +69,17 @@ AWS service list, account/Region, budget, runtime và IaC tool chưa được ch
 Xem [ADR 0001](../docs/adr/0001-single-aws-platform.md) và
 [AWS blueprint](../docs/architecture/aws-platform.md). Đây chưa phải deployment.
 
+### 1.3. Milestone DevOps — ACCEPTED, 2026-11-18
+
+Người dùng ưu tiên Terraform (có đường mở rộng AWS CDK) và AWS CodePipeline cho
+CI/CD, đồng thời cần tài liệu học/phỏng vấn. Business slice hiện tại được thu hẹp
+thành extract một SQL Server test table → mapping/filter → S3. Qualification,
+seniority, hai daily report products và SQL qualification backfeed DEFERRED trong
+milestone này; không xóa full business scope/acceptance phía dưới hoặc báo platform
+hoàn thành từ slice nhỏ. Xem [ADR 0002](../docs/adr/0002-devops-terraform-codepipeline.md)
+và [learning path](../docs/devops/README.md). AWS deployment vẫn cần account/Region/
+budget/isolation/network/source authorization và reviewed plan riêng.
+
 ## 2. Bối cảnh kinh doanh
 
 Nhà cung cấp vận hành giải pháp cho nhiều hãng độc lập. Trong **mỗi hãng**, phi

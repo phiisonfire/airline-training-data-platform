@@ -56,9 +56,19 @@ hoặc kinh nghiệm ở hãng khác chưa được mô tả; không tự suy ra
 
 Mục tiêu là upskill xây platform gồm ingestion/ETL/ELT, modeling, DQ, monitoring,
 governance, CI/CD/IaC và recovery trên các tech stack. Cập nhật 2026-11-17: người dùng chọn một data platform trên AWS trong repo này;
-không tiếp tục multi-stack implementations. Các services/runtime/IaC chưa chọn. Report authoring,
+không tiếp tục multi-stack implementations. Terraform và AWS CodePipeline được chọn cho DevOps slice ngày 2026-11-18;
+service implementation chi tiết xem ADR 0002, cloud environment chưa chốt. Report authoring,
 client application development và vận hành production không được tự mở rộng
 thành phạm vi triển khai nếu chưa được giao.
+
+### BR-08. DevOps-first milestone — ACCEPTED 2026-11-18
+
+Người dùng ưu tiên CI/CD với AWS CodePipeline, IaC Terraform có extension seam
+cho AWS CDK, và docs học/phỏng vấn. Business slice hiện tại thu hẹp thành extract
+một SQL Server test table, mapping/filter và ghi S3. Full qualification/seniority,
+hai BI products và app SQL backfeed DEFERRED trong milestone, không xóa full scope.
+Fixture devops.pilot_source là downstream synthetic contract, không suy ra source
+TMDS DDL. Local/mock tests không chứng minh deployed AWS/IAM/SQL behavior.
 
 ## B. Source contract reference — VERIFY AGAINST PINNED UPSTREAM
 

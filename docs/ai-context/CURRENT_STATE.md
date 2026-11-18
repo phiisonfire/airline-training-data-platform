@@ -1,75 +1,75 @@
-# CURRENT_STATE — Data Platform bootstrap
+# CURRENT_STATE — AWS platform, DevOps milestone
 
-Ngày khởi tạo: 2026-11-17. Đây là baseline tài liệu cho repo platform mới.
-Repo đã khảo sát: requirements/docs và `.gitignore`; chưa có runtime/manifests/tests.
+Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/ để chạy/học.
 
-## Trạng thái bằng chứng
+## Scope và bằng chứng
 
-- CURRENT ARTIFACTS: requirements, project memory, README/module guides, AWS blueprint và ADR 0001.
-- IMPLEMENTED PLATFORM: chưa có; hiện mới documentation/repository foundation.
-- Runtime/deployments/cloud resources/source endpoints/target SQL: UNVERIFIED.
-- Application/unit/integration/performance tests trong repo đích: NOT RUN.
-- Không chuyển kết quả tests hoặc lịch sử triển khai mockgen sang platform memory.
+- ACCEPTED: một platform trên AWS; Terraform trước, extension seam cho AWS CDK.
+- ACCEPTED: AWS CodePipeline/CodeBuild; business slice tạm là một SQL test table → mapping/filter → S3.
+- IMPLEMENTED trong repo: Python 3.12 snapshot pipeline, Terraform data plane/controller, CI buildspecs, local tests và learning docs.
+- Chưa deploy AWS; account/Region/budget/source endpoints/actual IAM/network/SQL integration: UNVERIFIED.
+- CDK adapter chưa implement; chọn cdk fail explicit, không fallback.
+- Qualification/seniority/two BI serving products/SQL qualification backfeed: DEFERRED trong milestone DevOps, full business scope giữ nguyên.
+- Không chuyển test/deployment results của mockgen sang repo này.
 
-## Business scope — ACCEPTED
+## Implementation paths
 
-- Một data platform dùng AWS; bỏ hướng nhiều stack implementations trong cùng repo.
+- sources/sqlserver/extract.py: bounded SELECT-only TLS extraction từ synthetic devops.pilot_source.
+- data_quality/simple + transformations/simple: strict types/PK/date/DQ rồi column mapping và active filter.
+- pipelines/sql_to_s3: trusted binding, immutable raw/replay, quarantine và manifest-last publication.
+- targets/s3/store.py: conditional writes, same payload replay, conflicting payload fail, SSE-KMS.
+- orchestration/sql-to-s3.asl.json: Step Functions definition dùng lại; Scheduler disabled mặc định.
+- contracts/devops/: snapshot v1 và IaC-neutral deployment JSON schema.
+- infra/terraform/bootstrap: state/artifacts/KMS, runtime boundary, CI roles/projects/pipeline và optional audit.
+- infra/terraform/platform + modules/data_plane: per-tenant S3/Lambda/KMS/Secrets/network endpoints/Glue/Athena/CloudWatch/SNS/SQS.
+- ci/: check/package/plan/apply/verify, owner-only empty state initialization, CodeBuild definitions.
+- tests/: offline unit/contract/replay/isolation-binding/CI integrity tests; Terraform mock tests ở IaC roots/module.
+- docs/devops/: architecture, Terraform/CDK, CI/CD và 20 interview questions; docs/runbooks/devops-lab.md.
 
-- Công ty cung cấp giải pháp training cho nhiều hãng hàng không.
-- Một hãng là một tenant; SQL Server sources, graph database và custom mappings riêng.
-- Organization/location thuộc nội bộ hãng, không là tenant; IDs giữa hãng có thể trùng.
-- Hỗ trợ khách yêu cầu data không lưu chung với hãng khác; isolation tier cần chốt.
-- Reporting: serving layer cho Power BI pilot learning status và pilot qualification status reports, công bố 1 lần/ngày. BI dev xây reports.
-- Backfeed: pilot qualification status ghi tới targeted SQL Server cho application client; latency càng nhỏ càng tốt, numeric SLO TBD.
-- Hai luồng dùng chung qualification semantics, không bắt backfeed chờ daily reporting.
-- TMDS employmentdate là input; downstream tính seniority theo số năm employed và mapping có version riêng theo hãng.
-- Seniority chưa là điều kiện qualification; rehire/leave-gap semantics chưa chốt.
+## DevOps boundaries
 
-## Upstream source reference
+- Bootstrap controller authority/state khác platform state/apply role; pipeline không sửa controller IAM.
+- Remote S3 state native lockfile; plan read/lock, apply state write; owner seed initial backend riêng.
+- Build/package/audit → saved plan → approval → exact plan apply → metadata/hash verify.
+- Plan bound source/ZIP/backend/boundary/TTL; encrypted artifacts, locked deps/providers.
+- Config deployment JSON chỉ non-secret reviewed refs; password nhập ngoài Terraform vào Secrets Manager.
+- Existing VPC/routes/source do owner cung cấp; Terraform tạo SG/S3 gateway/Secrets interface endpoints.
+- Dedicated bucket/KMS/roles/log groups per tenant deployment là lab resource isolation, chưa strict account/admin isolation.
+- Central logging dùng chuẩn/view thống nhất; không copy data-bearing tenant logs vào shared store.
+- Optional account-wide CloudTrail chỉ khi dedicated lab account được xác nhận hoặc dùng approved existing audit.
+- Default local checks/mock provider không cần AWS credentials, không tạo cloud resources có phí.
 
-- Repo upstream: pilot_training_platform_mock_data_generator; độc lập với repo này.
-- Baseline tham chiếu khi soạn: mockgen 0.5.0, source contract synthetic-v5.
-- Upstream commit/release/source location thực tế: cần xác minh và pin khi bootstrap.
-- Domains: TMDS, LMS, ETR, Flight API, QMS; registry nối source IDs trong hãng.
-- employmentdate: source ISO YYYY-MM-DD / SQL Server DATE; raw và derived tách riêng.
-- Mockgen SQL publish là source fixture publishing, không phải app qualification backfeed.
-- Chi tiết reference và giới hạn: [BUSINESS_RULES.md](BUSINESS_RULES.md).
+## Full business scope — vẫn ACCEPTED
 
-## Architecture direction — PROPOSED
+- Một hãng là tenant; SQL/graph/custom mappings riêng; org/location là nội bộ hãng; IDs giữa hãng có thể trùng.
+- Phải hỗ trợ yêu cầu không lưu chung data; isolation tier phải chốt, tenant_id/RLS chưa đủ.
+- Reporting: hai Power BI learning/qualification serving products 1 lần/ngày; BI dev xây reports.
+- Backfeed: current qualification vào SQL Server app, latency thấp nhất khả thi, numeric SLO TBD.
+- Hai luồng cùng qualification/identity/policy semantics; checkpoints/retries/recovery riêng; historical report không overwrite app current.
+- TMDS employmentdate là source DATE; seniority mapping/version theo hãng, chưa là qualification condition.
+- Rehire/leave gaps, exact seniority policy và report cutoff/deadline/timezone còn OPEN.
 
-- Tenant data planes tách biệt, common code/IaC templates, control metadata tối thiểu.
-- Bronze raw → Silver canonical/history/DQ; qualification evaluation history dùng chung.
-- Nhánh daily: Gold star/SCD2/bridges/data marts và hai BI serving contracts.
-- Nhánh operational: incremental/time-triggered evaluation → durable delivery → target SQL current qualification state.
-- Checkpoints/retries/publications/recovery độc lập; reconcile tại cùng source/rules/as-of.
-- Seniority snapshot theo tenant/user/as-of/policy version; không static trong employee dim.
-- AWS đã chọn; services/engine/orchestrator/account/Region/IaC/physical schemas còn OPEN.
-- Repo responsibilities và service candidates: [AWS blueprint](../architecture/aws-platform.md), PROPOSED.
-- Central logging có chuẩn/view thống nhất; data-bearing logs giữ tenant boundary.
-- Chi tiết responsibilities và failure boundaries: [ARCHITECTURE.md](ARCHITECTURE.md).
+## Upstream và test provenance
 
-## Quyết định còn mở
+- Upstream mockgen độc lập; baseline reference 0.5.0 / synthetic-v5, actual commit/source location chưa pin.
+- DevOps SQL fixture là downstream synthetic lab contract riêng, không phải TMDS production DDL.
+- Full source fixtures/registry/QMS chưa ingest. Generator-derived outputs chỉ là validation oracle.
+- Validation: lint pass, 43 pytest tests, 3 Terraform mock runs, fmt/validate, runtime dependency audit, local demo và isolated ZIP imports/hash pass.
+- Chi tiết trong HISTORY; các checks này không phải SQL/AWS runtime evidence.
 
-- AWS account/Region/budget, service list, language/dependencies, IaC/CI provider và test environment.
-- Ingestion mode: local artifacts hay SQL/graph/HTTP integration; source capabilities và registry delivery.
-- Reporting cutoff/deadline/business timezone/calendar và late-source policy.
-- Backfeed numeric latency SLO sau đo đạc; source availability/CDC/polling constraints.
-- Target SQL schema/keys/client identity/enums/write authority và lifecycle/error/stale handling.
-- Latest ETR/exam attempt policy; upstream reference dùng snapshot order.
-- Seniority bands, completed-years semantics, Feb-29 handling và policy effective dates.
-- Isolation tier, permissions/scopes, retention, scale, RPO/RTO và operational thresholds.
+## Quyết định / nghiệm thu còn thiếu
 
-## Milestone tiếp theo — PROPOSED
+- AWS account/Region/budget, isolation tier, VPC/subnets/routes/AZ/DNS, SQL source/TLS trust/read authority.
+- CodeConnections AVAILABLE ARN, repository/branch, bootstrap operator và approval permissions.
+- Reviewed non-secret config/deployment.json, lab retention, existing endpoints/audit và cleanup ownership.
+- AWS plan/apply, post-deploy smoke, tenant negative access, SNS test receiver, alarm delivery và state/data recovery drills.
+- Full reporting cutoff/deadline/timezone/late policy và Power BI refresh agreement.
+- App SQL identity/schema/enums/write conflicts/lifecycle/error/stale contract và measured numeric SLO.
+- Full qualification/latest-attempt/learning/seniority policy contracts và pinned upstream.
 
-1. Chốt runtime và contracts cho artifact vertical slice; AWS resource plan sau environment/budget.
-2. Xác minh business baseline; ghi ADR/decisions chỉ cho lựa chọn ảnh hưởng thiết kế.
-3. Pin source fixtures/contract, chốt grains/identity/expected results cho hai hãng.
-4. Làm vertical slice nhỏ: daily learning/qualification serving + qualification SQL backfeed.
-5. Kiểm chứng identity/isolation, DQ, replay, stale-state guard và recovery, rồi mở rộng vận hành.
+## Milestone tiếp theo
 
-## Memory maintenance
-
-- Đọc CURRENT_STATE một lần/phiên; giữ dưới khoảng 120 dòng.
-- Chỉ nâng PROPOSED → ACCEPTED khi có quyết định; IMPLEMENTED cần source evidence.
-- HISTORY append-only; không chép transcript, secrets hoặc test claims chưa chạy.
-- Requirements và data model proposal hiện có trong project_requirements/.
+1. Review DevOps code/docs và chạy local demo/check suite; hoàn thiện environment/budget/isolation inputs.
+2. Owner bootstrap + seed platform state; reviewed platform plan/approval/apply và metadata verify.
+3. Source owner chuẩn bị TEST fixture/TLS/secret; controlled workflow smoke rồi enable schedule nếu được duyệt.
+4. Verify actual IAM/isolation/logging/alarms/recovery/cost; chỉ sau đó mở rộng business requirements.
