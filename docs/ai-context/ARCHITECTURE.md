@@ -170,3 +170,10 @@ Implementation/source contracts và commands: [DevOps guide](../devops/README.md
 [runbook](../runbooks/devops-lab.md). Service choices của slice không chốt cloud
 account/Region/budget/isolation hoặc numeric business SLA. Actual access/network/
 SQL integration/recovery cần AWS evidence riêng.
+
+### 2026-11-19 — CodeCommit source
+
+ACCEPTED/IMPLEMENTED: bootstrap dùng existing CodeCommit repository cùng account/Region,
+inputs repository_name/branch; source CODE_ZIP và polling, không CodeConnection.
+Pipeline IAM giới hạn source actions vào repository ARN. Operator quản lý repository
+và push source trước apply. AWS runtime vẫn UNVERIFIED.

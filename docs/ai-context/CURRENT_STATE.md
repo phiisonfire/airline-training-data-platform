@@ -60,7 +60,7 @@ Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/
 ## Quyết định / nghiệm thu còn thiếu
 
 - AWS account/Region/budget, isolation tier, VPC/subnets/routes/AZ/DNS, SQL source/TLS trust/read authority.
-- CodeConnections AVAILABLE ARN, repository/branch, bootstrap operator và approval permissions.
+- CodeCommit repository name/branch trong cùng account/Region, bootstrap operator và approval permissions.
 - Reviewed non-secret config/deployment.json, lab retention, existing endpoints/audit và cleanup ownership.
 - AWS plan/apply, post-deploy smoke, tenant negative access, SNS test receiver, alarm delivery và state/data recovery drills.
 - Full reporting cutoff/deadline/timezone/late policy và Power BI refresh agreement.

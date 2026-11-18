@@ -5,16 +5,23 @@ mock_provider "aws" {
   mock_data "aws_partition" { defaults = { partition = "aws" } }
 }
 variables {
-  project        = "atdp"
-  environment    = "dev"
-  tenant_id      = "airline-a"
-  region         = "us-east-1"
-  connection_arn = "arn:aws:codeconnections:us-east-1:123456789012:connection/00000000-0000-0000-0000-000000000000"
-  repository_id  = "example/repository"
-  branch         = "main"
+  project         = "atdp"
+  environment     = "dev"
+  tenant_id       = "airline-a"
+  region          = "us-east-1"
+  repository_name = "example-repository"
+  branch          = "main"
 }
 run "controller_security" {
   command = apply
+  assert {
+    condition     = aws_codepipeline.platform.stage[0].action[0].provider == "CodeCommit" && aws_codepipeline.platform.stage[0].action[0].configuration["RepositoryName"] == var.repository_name && aws_codepipeline.platform.stage[0].action[0].configuration["PollForSourceChanges"] == "true"
+    error_message = "Source must poll the selected CodeCommit repository."
+  }
+  assert {
+    condition     = jsondecode(aws_iam_role_policy.pipeline.policy).Statement[0].Resource == "arn:aws:codecommit:us-east-1:123456789012:example-repository" && toset(jsondecode(aws_iam_role_policy.pipeline.policy).Statement[0].Action) == toset(["codecommit:GetBranch", "codecommit:GetCommit", "codecommit:UploadArchive", "codecommit:GetUploadArchiveStatus", "codecommit:CancelUploadArchive"])
+    error_message = "Pipeline source permissions must be limited to the selected repository."
+  }
   assert {
     condition     = alltrue([for p in aws_iam_policy.apply : length(p.policy) <= 6144])
     error_message = "A managed deploy policy exceeds AWS IAM policy size quota."

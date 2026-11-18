@@ -2,9 +2,12 @@
 
 ## Một commit đi qua pipeline thế nào?
 
-1. **Source**: CodeConnections đã AVAILABLE đọc đúng repository/branch đã chọn.
-   Không lưu Git token trong Terraform. Provider có thể là repository service
-   được CodeConnections hỗ trợ; repo này không tự quyết định host của người dùng.
+1. **Source**: CodeCommit repository có sẵn trong cùng account/Region, branch đã push.
+   Bootstrap nhận `repository_name` và `branch`; không dùng CodeConnection/Git token.
+   `PollForSourceChanges=true` phát hiện commit bằng polling; chưa dùng EventBridge.
+   Source xuất CODE_ZIP; CodeBuild không cần quyền GitPull. Pipeline role chỉ có
+   GetBranch/GetCommit/UploadArchive/GetUploadArchiveStatus/CancelUploadArchive
+   trên ARN repository đã chọn. Repository do operator quản lý ngoài bootstrap.
 2. **Build**: install hashed lockfile, package Linux x86_64 Python 3.12 ZIP,
    lint/tests, Terraform schema/mock-provider tests, dependency audit và validate
    deployment config. Không có quyền deploy hoặc đọc source SQL secret.

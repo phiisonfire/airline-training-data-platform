@@ -2,13 +2,13 @@ variable "region" { type = string }
 variable "project" { type = string }
 variable "environment" { type = string }
 variable "tenant_id" { type = string }
-variable "connection_arn" {
+variable "repository_name" {
   type        = string
-  description = "Existing AVAILABLE CodeConnections ARN; authorize repository outside Terraform"
-}
-variable "repository_id" {
-  type        = string
-  description = "Provider full repository ID, e.g. owner/repository; no token or clone URL"
+  description = "Existing CodeCommit repository in the deployment account and Region; push the selected branch before bootstrap apply"
+  validation {
+    condition     = can(regex("^[A-Za-z0-9_.-]{1,100}$", var.repository_name))
+    error_message = "Use a CodeCommit repository name, not an owner/repository path, ARN or URL."
+  }
 }
 variable "branch" { type = string }
 variable "enable_cloudtrail" {

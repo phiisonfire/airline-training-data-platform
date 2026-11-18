@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
-    R[Repository via existing CodeConnections] --> B[CodeBuild: tests/package/audit]
+    R[Existing CodeCommit repository] --> B[CodeBuild: tests/package/audit]
     B --> P[CodeBuild: Terraform plan]
     P --> A[Manual approval]
     A --> D[CodeBuild: apply saved plan]

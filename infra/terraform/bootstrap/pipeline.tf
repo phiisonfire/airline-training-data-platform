@@ -54,7 +54,7 @@ resource "aws_iam_role" "pipeline" {
 resource "aws_iam_role_policy" "pipeline" {
   role = aws_iam_role.pipeline.id
   policy = jsonencode({ Version = "2012-10-17", Statement = [
-    { Effect = "Allow", Action = ["codeconnections:UseConnection", "codestar-connections:UseConnection"], Resource = var.connection_arn },
+    { Effect = "Allow", Action = ["codecommit:GetBranch", "codecommit:GetCommit", "codecommit:UploadArchive", "codecommit:GetUploadArchiveStatus", "codecommit:CancelUploadArchive"], Resource = "${local.arn}:codecommit:${var.region}:${local.account}:${var.repository_name}" },
     { Effect = "Allow", Action = ["s3:GetObject", "s3:GetObjectVersion", "s3:PutObject"], Resource = "${aws_s3_bucket.control["artifacts"].arn}/*" },
     { Effect = "Allow", Action = ["s3:GetBucketVersioning", "s3:GetBucketLocation"], Resource = aws_s3_bucket.control["artifacts"].arn },
     { Effect = "Allow", Action = ["kms:Decrypt", "kms:Encrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:DescribeKey"], Resource = aws_kms_key.control.arn },
@@ -80,14 +80,13 @@ resource "aws_codepipeline" "platform" {
       name             = "Repository"
       category         = "Source"
       owner            = "AWS"
-      provider         = "CodeStarSourceConnection"
+      provider         = "CodeCommit"
       version          = "1"
       output_artifacts = ["SourceOutput"]
       configuration = {
-        ConnectionArn        = var.connection_arn
-        FullRepositoryId     = var.repository_id
+        RepositoryName       = var.repository_name
         BranchName           = var.branch
-        DetectChanges        = "true"
+        PollForSourceChanges = "true"
         OutputArtifactFormat = "CODE_ZIP"
       }
     }

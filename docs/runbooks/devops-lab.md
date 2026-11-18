@@ -37,8 +37,7 @@ synthetic identifiers và fake AWS clients, không production.
 
 Ghi lại: AWS account/Region, lab budget/cleanup owner, tenant isolation tier,
 existing VPC/private subnet IDs, route table IDs, SQL CIDR/port/DNS/TLS trust,
-read-only SQL principal, existing org/account CloudTrail coverage và CodeConnections
-AVAILABLE ARN + repository ID/branch. Không tự mở SQL public Internet để test.
+read-only SQL principal, existing org/account CloudTrail coverage và CodeCommit repository name/branch trong cùng account/Region. Không tự mở SQL public Internet để test.
 
 Interface endpoint Secrets Manager và S3 gateway endpoint được module tạo. Nếu
 VPC đã có endpoints, xem plan và quyết định import/reuse trước apply; không tự
@@ -60,6 +59,12 @@ như password. Ví dụ retention 30 ngày chỉ là lab proposal, không produc
 ```bash
 .venv/bin/python ci/iac.py validate
 ```
+
+Source dùng CodeCommit repository có sẵn trong cùng account/Region. Operator tạo
+repository và push branch đã review trước bootstrap apply; bootstrap không tạo repo.
+Điền `repository_name` (tên repo, không phải URL hoặc owner/repository) và `branch`.
+Không cần `connection_arn`/`repository_id`; xóa các inputs cũ khỏi tfvars nếu đã có.
+Polling có thể khởi chạy CI; platform Apply vẫn cần manual approval.
 
 Bootstrap variables: copy `infra/terraform/bootstrap/terraform.tfvars.example`
 thành `terraform.tfvars` trong cùng thư mục, điền non-secret references. `.tfvars`
@@ -99,7 +104,7 @@ Giữ bootstrap backend binding an toàn để operator/CI checks không nhầm 
 state về sau. Không commit `.terraform/` metadata. Bootstrap role quản lý backend
 riêng; platform plan/apply roles không có quyền bootstrap state key.
 
-Pipeline source change detection bật; trước bootstrap apply phải có config và
+Pipeline CodeCommit polling bật; trước bootstrap apply phải có config và
 source branch đã review. Pipeline có manual approval, không auto apply platform.
 Chỉ người được cấp `codepipeline:PutApprovalResult` nên được approve. Không tạo
 human notification subscriptions trong baseline; operator xem console.
