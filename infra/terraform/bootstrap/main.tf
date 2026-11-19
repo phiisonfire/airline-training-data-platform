@@ -22,7 +22,7 @@ locals {
 resource "aws_kms_key" "control" {
   description             = "Terraform state and encrypted CI artifacts; no source credentials"
   enable_key_rotation     = true
-  deletion_window_in_days = 30
+  deletion_window_in_days = 7
   policy = jsonencode({ Version = "2012-10-17", Statement = [
     { Effect = "Allow", Principal = { AWS = "${local.arn}:iam::${local.account}:root" }, Action = "kms:*", Resource = "*" },
     { Effect = "Allow", Principal = { Service = "logs.${var.region}.amazonaws.com" }, Action = ["kms:Encrypt*", "kms:Decrypt*", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"], Resource = "*", Condition = { ArnLike = { "kms:EncryptionContext:aws:logs:arn" = "${local.arn}:logs:${var.region}:${local.account}:log-group:/codebuild/${local.name}-*" } } },
@@ -33,9 +33,8 @@ resource "aws_kms_key" "control" {
 resource "aws_s3_bucket" "control" {
   for_each      = toset(["state", "artifacts"])
   bucket        = "${local.name}-${each.key}-${local.account}-${var.region}"
-  force_destroy = false
+  force_destroy = true
   tags          = local.tags
-  lifecycle { prevent_destroy = true }
 }
 resource "aws_s3_bucket_public_access_block" "control" {
   for_each                = aws_s3_bucket.control

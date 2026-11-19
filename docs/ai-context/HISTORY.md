@@ -32,3 +32,10 @@ relevant paths và validation thực tế. Không nhập lịch sử code/tests 
 - Pipeline source IAM giới hạn năm archive/branch/commit actions vào đúng repository ARN; bỏ UseConnection. Operator push source trước apply; approval/platform state boundaries giữ nguyên.
 - Paths: infra/terraform/bootstrap/{variables.tf,pipeline.tf,terraform.tfvars.example,tests/security.tftest.hcl}; docs/devops/{cicd.md,architecture.md}, docs/runbooks/devops-lab.md và project memory.
 - Validation: Terraform fmt check, validate và 1 mock-provider test run pass (source config/repository IAM assertions). Provider validate/tests chạy ngoài sandbox để dùng local socket; không gọi AWS, không đọc credentials, không deploy. AWS runtime/Free Plan account-specific availability UNVERIFIED.
+
+## 2026-11-19 — Destructive cleanup cho lab
+
+- ACCEPTED/IMPLEMENTED: theo yêu cầu user, bỏ prevent_destroy ở buckets data/control/audit, force_destroy=true; KMS deletion window=7, Secrets Manager recovery window=0. Không áp dụng làm production defaults.
+- Runbook docs/runbooks/devops-lab-cleanup.md: dừng writers, áp dụng flags vào existing state, destroy platform bằng owner, migrate bootstrap backend về local rồi destroy bootstrap; inventory ngoài Terraform và kiểm tra billing riêng. Không hứa zero charges hoặc xóa KMS tức thì.
+- Paths: infra/terraform/bootstrap/{main.tf,audit.tf,tests/security.tftest.hcl}, infra/terraform/modules/data_plane/{main.tf,tests/security.tftest.hcl}; docs/devops/{README.md,terraform-and-cdk.md}, docs/runbooks/{devops-lab.md,devops-lab-cleanup.md}, project memory.
+- Validation: Terraform fmt check, validate bootstrap/platform/data_plane, 2 mock-provider test runs pass với cleanup flag assertions; git diff --check pass. Provider checks ngoài sandbox cho local socket, không gọi AWS. Cleanup/deletion/billing thực tế UNVERIFIED; không đọc credentials hoặc xóa resources.

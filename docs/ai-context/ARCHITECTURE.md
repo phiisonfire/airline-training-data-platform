@@ -177,3 +177,11 @@ ACCEPTED/IMPLEMENTED: bootstrap dùng existing CodeCommit repository cùng accou
 inputs repository_name/branch; source CODE_ZIP và polling, không CodeConnection.
 Pipeline IAM giới hạn source actions vào repository ARN. Operator quản lý repository
 và push source trước apply. AWS runtime vẫn UNVERIFIED.
+
+### 2026-11-19 — Destructive lab cleanup
+
+ACCEPTED/IMPLEMENTED theo user: bỏ bucket prevent_destroy, force_destroy=true cho
+data/control/audit; secret recovery window=0, KMS deletion window=7. Chỉ lab.
+Destroy bằng operator (CI role cố ý deny tenant objects), platform trước bootstrap;
+migrate bootstrap backend S3 về local trước xóa bucket. Manual resources cần cleanup
+riêng. Không cam kết zero charges; actual destroy UNVERIFIED.

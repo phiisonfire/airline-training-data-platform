@@ -24,6 +24,10 @@ variables {
 run "tenant_security" {
   command = apply
   assert {
+    condition     = aws_s3_bucket.data.force_destroy && aws_kms_key.tenant.deletion_window_in_days == 7 && aws_secretsmanager_secret.source.recovery_window_in_days == 0
+    error_message = "Lab resources must support destructive cleanup with minimal deletion delays."
+  }
+  assert {
     condition     = aws_s3_bucket_public_access_block.data.block_public_policy && aws_s3_bucket_public_access_block.data.restrict_public_buckets && aws_s3_bucket_public_access_block.data.block_public_acls && aws_s3_bucket_public_access_block.data.ignore_public_acls
     error_message = "Data bucket must block all public access."
   }

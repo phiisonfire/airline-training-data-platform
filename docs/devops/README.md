@@ -37,3 +37,5 @@ CodePipeline/CodeBuild definitions và tests. AWS deployment, SQL integration,
 actual IAM enforcement và recovery drills: UNVERIFIED nếu chưa có run evidence.
 Qualification/seniority, learning reports và operational SQL backfeed: DEFERRED
 cho milestone DevOps này; business requirements gốc vẫn giữ nguyên.
+
+Cleanup lab: xem [runbook xóa resources](../runbooks/devops-lab-cleanup.md).

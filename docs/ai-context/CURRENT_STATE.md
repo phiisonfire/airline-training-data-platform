@@ -67,6 +67,11 @@ Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/
 - App SQL identity/schema/enums/write conflicts/lifecycle/error/stale contract và measured numeric SLO.
 - Full qualification/latest-attempt/learning/seniority policy contracts và pinned upstream.
 
+## Lab cleanup — 2026-11-19
+
+- ACCEPTED/IMPLEMENTED: buckets cho phép force_destroy, không prevent_destroy; secret recovery=0, KMS deletion=7 ngày. Chỉ lab, không production defaults.
+- Runbook: docs/runbooks/devops-lab-cleanup.md; platform trước bootstrap, migrate bootstrap state về local trước xóa state bucket. AWS cleanup UNVERIFIED.
+
 ## Milestone tiếp theo
 
 1. Review DevOps code/docs và chạy local demo/check suite; hoàn thiện environment/budget/isolation inputs.

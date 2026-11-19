@@ -211,3 +211,5 @@ Cleanup phải scope đúng tenant/environment, tắt schedule, giữ evidence/s
 review destroy plan. Buckets có prevent_destroy/force_destroy=false; không bypass
 hoặc empty bucket tự động. KMS/Secrets có delayed deletion. Endpoint/shared route
 impact và retained data/audit/backups cần owner quyết định trước cleanup.
+
+Cleanup lab: xem [runbook xóa resources](devops-lab-cleanup.md).

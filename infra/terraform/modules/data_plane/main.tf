@@ -15,7 +15,7 @@ locals {
 resource "aws_kms_key" "tenant" {
   description             = "Tenant-bound data platform encryption"
   enable_key_rotation     = true
-  deletion_window_in_days = 30
+  deletion_window_in_days = 7
   policy = jsonencode({ Version = "2012-10-17", Statement = [
     { Sid = "AccountDelegation", Effect = "Allow", Principal = { AWS = "${local.arn}:iam::${local.account}:root" }, Action = "kms:*", Resource = "*" },
     { Sid = "TenantLogs", Effect = "Allow", Principal = { Service = "logs.${local.region}.amazonaws.com" }, Action = ["kms:Encrypt*", "kms:Decrypt*", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"], Resource = "*", Condition = { ArnLike = { "kms:EncryptionContext:aws:logs:arn" = local.log_arn } } },
@@ -29,9 +29,8 @@ resource "aws_kms_alias" "tenant" {
 }
 resource "aws_s3_bucket" "data" {
   bucket        = "${var.name}-${local.account}-${local.region}"
-  force_destroy = false
+  force_destroy = true
   tags          = var.tags
-  lifecycle { prevent_destroy = true }
 }
 resource "aws_s3_bucket_public_access_block" "data" {
   bucket                  = aws_s3_bucket.data.id
@@ -74,7 +73,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "data" {
 resource "aws_secretsmanager_secret" "source" {
   name                    = "${var.name}/sql-source"
   kms_key_id              = aws_kms_key.tenant.arn
-  recovery_window_in_days = 30
+  recovery_window_in_days = 0
   tags                    = var.tags
   # Secret value deliberately NOT managed in Terraform/state.
 }

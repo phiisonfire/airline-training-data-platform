@@ -50,9 +50,12 @@ Drift review: owner chạy plan qua pipeline định kỳ/manual; chưa có auto
 scheduled drift detection. Manual edit Lambda alias rồi plan sẽ thấy desired
 state khác; chọn revert hay update code, không apply mù.
 
-`prevent_destroy` bảo vệ data/state/artifact buckets trong configuration hiện tại;
-không phải IAM deny và không chống người xóa bằng console hoặc remove cả resource
-block. Retention/backup/recovery vẫn cần owner và drills riêng.
+Lab buckets không dùng `prevent_destroy`, dùng `force_destroy=true`: destroy xóa
+cả objects/versions. Secret không có recovery window; KMS chờ xóa 7 ngày.
+Đây là destructive lab defaults, không dùng nguyên trạng cho production.
+Xem [cleanup runbook](../runbooks/devops-lab-cleanup.md) trước destroy, đặc biệt
+apply flags vào existing state và migrate bootstrap backend về local trước khi
+xóa state bucket.
 
 ## Pinning và modules
 

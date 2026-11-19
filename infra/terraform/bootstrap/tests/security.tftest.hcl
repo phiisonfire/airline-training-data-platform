@@ -15,6 +15,10 @@ variables {
 run "controller_security" {
   command = apply
   assert {
+    condition     = alltrue([for bucket in aws_s3_bucket.control : bucket.force_destroy]) && aws_kms_key.control.deletion_window_in_days == 7
+    error_message = "Lab resources must support destructive cleanup with minimal deletion delays."
+  }
+  assert {
     condition     = aws_codepipeline.platform.stage[0].action[0].provider == "CodeCommit" && aws_codepipeline.platform.stage[0].action[0].configuration["RepositoryName"] == var.repository_name && aws_codepipeline.platform.stage[0].action[0].configuration["PollForSourceChanges"] == "true"
     error_message = "Source must poll the selected CodeCommit repository."
   }

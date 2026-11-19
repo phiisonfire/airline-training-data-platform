@@ -2,9 +2,8 @@
 resource "aws_s3_bucket" "audit" {
   count         = var.enable_cloudtrail ? 1 : 0
   bucket        = "${local.name}-audit-${local.account}-${var.region}"
-  force_destroy = false
+  force_destroy = true
   tags          = local.tags
-  lifecycle { prevent_destroy = true }
 }
 resource "aws_s3_bucket_public_access_block" "audit" {
   count                   = var.enable_cloudtrail ? 1 : 0
