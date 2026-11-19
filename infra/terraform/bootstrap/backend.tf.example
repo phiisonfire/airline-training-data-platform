@@ -1,0 +1,5 @@
+# Copy to backend.tf only after the initial local bootstrap has created the bucket.
+# Supply bucket/key/region/KMS bindings through init -migrate-state; no credentials.
+terraform {
+  backend "s3" {}
+}

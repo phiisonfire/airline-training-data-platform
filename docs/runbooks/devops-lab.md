@@ -85,12 +85,47 @@ phí sau approval. Không có config account thực tế trong repo.
 /tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap output -json bootstrap_contract
 ```
 
-Local bootstrap state chứa sensitive infrastructure metadata: giữ encrypted và
-restricted ngoài Git, không upload công khai. Sau first apply, tạo file ignored
-`infra/terraform/bootstrap/backend.tf` với `terraform { backend "s3" {} }`, migrate
-state vào bucket state vừa tạo, key riêng `bootstrap/<deployment>/terraform.tfstate`:
+### Migrate bootstrap state từ local lên S3
+
+Template được version trong `infra/terraform/bootstrap/backend.tf.example`;
+file active `backend.tf` được Git-ignore để first bootstrap vẫn dùng local.
+Không commit account bindings hoặc state. Migration là thao tác remote do operator
+chạy, không được tự động thực hiện bởi template.
+
+**Nếu first apply chưa hoàn tất và bucket/KMS chưa tồn tại:** tạm đổi tên file
+`backend.tf` thành `backend.tf.disabled` (nếu có), giữ nguyên local state và
+`.terraform/`. Chạy init/plan/apply local như trên, tạo plan mới nếu configuration
+đã đổi. Nếu đã partial apply, tiếp tục với state hiện tại, không tạo state rỗng.
+Sau khi first apply thành công, bật lại template theo lệnh copy bên dưới.
+Nếu backend S3 đã được init/migrate trước đó, không chuyển sang local tùy tiện;
+xác minh backend hiện tại trước khi thực hiện quy trình này.
+
+**Nếu bucket/KMS đã tồn tại từ successful local apply:** không apply lại để migrate.
+Dừng pipeline executions và mọi Terraform writers trước khi copy state. Trong
+terminal dùng owner profile đã login, chạy từ root repo:
 
 ```bash
+export AWS_PROFILE=atdp-terraform
+aws sts get-caller-identity
+umask 077
+mkdir -p phi_local/cleanup
+/tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap state pull > phi_local/cleanup/bootstrap-before-s3.tfstate
+/tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap state list
+/tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap output -json bootstrap_contract
+```
+
+Nếu backend.tf mới thêm khiến state/output commands yêu cầu init, tạm đổi tên nó
+thành backend.tf.disabled để đọc/backup local state trước; chưa chạy init S3.
+Không in state hoặc gửi backup ra chat. Ghi lại state resource addresses, lấy
+`state_bucket` và `state_kms_arn` từ output; Region từ tfvars. Deployment là
+`<project>-<environment>-<tenant_id>`. KHÔNG dùng `state_key` từ output: đó là key
+platform, còn bootstrap dùng key riêng bên dưới. Nếu output thiếu vì apply chưa
+xong, hoàn tất/reconcile local apply trước. Không ghi đè key S3 đã chứa state khác.
+
+Bật khai báo S3, thay các YOUR_* bằng bindings thật rồi migrate:
+
+```bash
+cp infra/terraform/bootstrap/backend.tf.example infra/terraform/bootstrap/backend.tf
 /tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap init -migrate-state \
   -backend-config=bucket=YOUR_STATE_BUCKET \
   -backend-config=key=bootstrap/YOUR_DEPLOYMENT/terraform.tfstate \
@@ -99,6 +134,26 @@ state vào bucket state vừa tạo, key riêng `bootstrap/<deployment>/terrafor
   -backend-config=encrypt=true \
   -backend-config=use_lockfile=true
 ```
+
+Terraform hỏi copy existing state sang backend mới: xác minh source/destination
+rồi trả lời `yes`. Không dùng `-reconfigure` thay `-migrate-state`, không dùng
+`-force-copy` để bỏ qua review, không xóa local state trước migration.
+
+Sau migration:
+
+```bash
+/tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap state list
+/tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap output -json bootstrap_contract
+/tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap plan -out=bootstrap.tfplan
+/tmp/atdp-tools/terraform -chdir=infra/terraform/bootstrap show bootstrap.tfplan
+```
+
+Resource addresses/outputs phải khớp trước migration. Xác minh object key bootstrap
+trong S3 Console và mã hóa KMS. Migration không tự tạo lại resources; nếu plan đề
+xuất tạo lại toàn bộ, dừng để kiểm tra nhầm key/state. Không apply plan cũ tạo trước
+migration. Chỉ xóa local backup sau khi đã kiểm chứng remote state và có backup
+policy phù hợp. Cleanup bucket cuối lab phải migrate về local trước; xem runbook
+[cleanup](devops-lab-cleanup.md).
 
 Giữ bootstrap backend binding an toàn để operator/CI checks không nhầm local
 state về sau. Không commit `.terraform/` metadata. Bootstrap role quản lý backend

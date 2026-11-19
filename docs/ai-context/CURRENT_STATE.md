@@ -78,3 +78,5 @@ Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/
 2. Owner bootstrap + seed platform state; reviewed platform plan/approval/apply và metadata verify.
 3. Source owner chuẩn bị TEST fixture/TLS/secret; controlled workflow smoke rồi enable schedule nếu được duyệt.
 4. Verify actual IAM/isolation/logging/alarms/recovery/cost; chỉ sau đó mở rộng business requirements.
+
+- Bootstrap S3 migration: template infra/terraform/bootstrap/backend.tf.example; active backend.tf ignored, local-first init trước khi bucket tồn tại. Migration remote chưa chạy.

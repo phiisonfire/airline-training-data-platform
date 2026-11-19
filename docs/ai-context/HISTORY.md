@@ -39,3 +39,9 @@ relevant paths và validation thực tế. Không nhập lịch sử code/tests 
 - Runbook docs/runbooks/devops-lab-cleanup.md: dừng writers, áp dụng flags vào existing state, destroy platform bằng owner, migrate bootstrap backend về local rồi destroy bootstrap; inventory ngoài Terraform và kiểm tra billing riêng. Không hứa zero charges hoặc xóa KMS tức thì.
 - Paths: infra/terraform/bootstrap/{main.tf,audit.tf,tests/security.tftest.hcl}, infra/terraform/modules/data_plane/{main.tf,tests/security.tftest.hcl}; docs/devops/{README.md,terraform-and-cdk.md}, docs/runbooks/{devops-lab.md,devops-lab-cleanup.md}, project memory.
 - Validation: Terraform fmt check, validate bootstrap/platform/data_plane, 2 mock-provider test runs pass với cleanup flag assertions; git diff --check pass. Provider checks ngoài sandbox cho local socket, không gọi AWS. Cleanup/deletion/billing thực tế UNVERIFIED; không đọc credentials hoặc xóa resources.
+
+## 2026-11-19 — Bootstrap S3 backend template và migration guide
+
+- IMPLEMENTED: template backend.tf.example và local ignored backend.tf khai báo S3; runbook thêm backup local state, first-apply chưa xong, migration có xác nhận, bootstrap key riêng và verification/re-plan. Kiến trúc local-first rồi remote S3 không đổi.
+- Paths: infra/terraform/bootstrap/backend.tf.example, docs/runbooks/devops-lab.md, CURRENT_STATE.
+- Validation: terraform fmt -check backend.tf và git diff --check pass. Không init/migrate/apply, không đọc state/credentials, AWS migration UNVERIFIED.
