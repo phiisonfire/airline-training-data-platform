@@ -135,7 +135,7 @@ resource "aws_iam_role_policy" "refresh" {
   role     = aws_iam_role.build[each.key].id
   policy = jsonencode({ Version = "2012-10-17", Statement = [
     { Effect = "Allow", Action = ["ec2:Describe*", "kms:DescribeKey", "kms:GetKeyPolicy", "kms:GetKeyRotationStatus", "kms:ListResourceTags", "kms:ListAliases", "logs:Describe*", "logs:ListTagsForResource", "cloudwatch:DescribeAlarms", "cloudwatch:GetDashboard", "cloudwatch:ListTagsForResource", "scheduler:GetSchedule", "scheduler:ListTagsForResource", "sts:GetCallerIdentity"], Resource = "*" },
-    { Effect = "Allow", Action = ["s3:GetBucket*", "s3:GetEncryptionConfiguration", "s3:GetLifecycleConfiguration", "s3:ListBucket"], Resource = "${local.arn}:s3:::${local.data_bucket}" },
+    { Effect = "Allow", Action = ["s3:GetBucket*", "s3:GetAccelerateConfiguration", "s3:GetEncryptionConfiguration", "s3:GetLifecycleConfiguration", "s3:ListBucket"], Resource = "${local.arn}:s3:::${local.data_bucket}" },
     { Effect = "Allow", Action = ["iam:GetRole", "iam:GetRolePolicy", "iam:ListRolePolicies", "iam:ListAttachedRolePolicies", "iam:GetPolicy", "iam:GetPolicyVersion", "iam:ListPolicyVersions", "iam:ListRoleTags", "iam:ListPolicyTags"], Resource = ["${local.arn}:iam::${local.account}:role/${local.name}-*", "${local.arn}:iam::${local.account}:policy/${local.name}-*"] },
     { Effect = "Allow", Action = ["lambda:Get*", "lambda:ListVersionsByFunction", "lambda:ListAliases", "lambda:ListTags"], Resource = "${local.arn}:lambda:${var.region}:${local.account}:function:${local.name}-*" },
     { Effect = "Allow", Action = ["states:DescribeStateMachine", "states:ListTagsForResource"], Resource = "${local.arn}:states:${var.region}:${local.account}:stateMachine:${local.name}-*" },
