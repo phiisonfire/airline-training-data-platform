@@ -32,7 +32,11 @@ locals {
     { Sid = "SourceSecretKeyValidation", Effect = "Allow", Action = ["kms:GenerateDataKey", "kms:Decrypt"], Resource = "${local.arn}:kms:${var.region}:${local.account}:key/*", Condition = {
       StringEquals = { "aws:ResourceTag/Deployment" = local.name, "kms:ViaService" = "secretsmanager.${var.region}.amazonaws.com" },
       ArnLike      = { "kms:EncryptionContext:SecretARN" = "${local.arn}:secretsmanager:${var.region}:${local.account}:secret:${local.name}/sql-source-??????" }
-    } }
+    } },
+    # DeleteDatabase also checks permissions on all descendant UDFs.
+    { Sid = "DeleteDeploymentDatabaseFunctions", Effect = "Allow", Action = "glue:DeleteDatabase", Resource = "${local.arn}:glue:${var.region}:${local.account}:userDefinedFunction/${replace(local.name, "-", "_")}/*" },
+    # Validation takes a definition, not a state machine ARN; resource scoping is unsupported.
+    { Sid = "ValidateWorkflowDefinition", Effect = "Allow", Action = "states:ValidateStateMachineDefinition", Resource = "*", Condition = { StringEquals = { "aws:RequestedRegion" = var.region } } }
   ]
 }
 resource "aws_iam_policy" "apply" {

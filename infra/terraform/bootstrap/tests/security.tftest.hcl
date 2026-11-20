@@ -15,6 +15,14 @@ variables {
 run "controller_security" {
   command = apply
   assert {
+    condition = anytrue([for statement in local.apply_statements :
+      try(statement.Sid == "DeleteDeploymentDatabaseFunctions" && statement.Action == "glue:DeleteDatabase" && statement.Resource == "arn:aws:glue:us-east-1:123456789012:userDefinedFunction/atdp_dev_airline_a/*", false)
+      ]) && anytrue([for statement in local.apply_statements :
+      try(statement.Sid == "ValidateWorkflowDefinition" && statement.Action == "states:ValidateStateMachineDefinition" && statement.Resource == "*" && statement.Condition.StringEquals["aws:RequestedRegion"] == var.region, false)
+    ])
+    error_message = "Apply requires scoped Glue descendant deletion and regional ASL validation."
+  }
+  assert {
     condition = alltrue([for role in ["plan", "apply", "verify"] : anytrue([
       for statement in jsondecode(aws_iam_role_policy.refresh[role].policy).Statement :
       try(contains(statement.Action, "glue:GetTags"), false) &&
