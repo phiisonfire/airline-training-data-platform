@@ -23,10 +23,16 @@ locals {
     { Effect = "Allow", Action = ["logs:CreateLogGroup", "logs:DeleteLogGroup", "logs:PutRetentionPolicy", "logs:DeleteRetentionPolicy", "logs:AssociateKmsKey", "logs:DisassociateKmsKey", "logs:TagResource", "logs:UntagResource", "logs:ListTagsLogGroup"], Resource = "${local.arn}:logs:${var.region}:${local.account}:log-group:/platform/${local.name}/*" },
     { Effect = "Allow", Action = ["cloudwatch:PutMetricAlarm", "cloudwatch:DeleteAlarms", "cloudwatch:PutDashboard", "cloudwatch:DeleteDashboards", "cloudwatch:TagResource", "cloudwatch:UntagResource"], Resource = ["${local.arn}:cloudwatch:${var.region}:${local.account}:alarm:${local.name}-*", "${local.arn}:cloudwatch::${local.account}:dashboard/${local.name}"] },
     { Effect = "Allow", Action = ["athena:CreateWorkGroup", "athena:UpdateWorkGroup", "athena:DeleteWorkGroup", "athena:TagResource", "athena:UntagResource"], Resource = "${local.arn}:athena:${var.region}:${local.account}:workgroup/${local.name}" },
-    { Effect = "Allow", Action = ["glue:CreateDatabase", "glue:UpdateDatabase", "glue:DeleteDatabase", "glue:CreateTable", "glue:UpdateTable", "glue:DeleteTable"], Resource = ["${local.arn}:glue:${var.region}:${local.account}:catalog", "${local.arn}:glue:${var.region}:${local.account}:database/${replace(local.name, "-", "_")}", "${local.arn}:glue:${var.region}:${local.account}:table/${replace(local.name, "-", "_")}/*"] },
+    { Effect = "Allow", Action = ["glue:CreateDatabase", "glue:UpdateDatabase", "glue:DeleteDatabase", "glue:CreateTable", "glue:UpdateTable", "glue:DeleteTable", "glue:TagResource", "glue:UntagResource"], Resource = ["${local.arn}:glue:${var.region}:${local.account}:catalog", "${local.arn}:glue:${var.region}:${local.account}:database/${replace(local.name, "-", "_")}", "${local.arn}:glue:${var.region}:${local.account}:table/${replace(local.name, "-", "_")}/*"] },
     # EC2 create/endpoint routing uses existing network resources. Review this regional
     # lab deployment authority before use; runtime role is far narrower.
-    { Effect = "Allow", Action = ["ec2:CreateSecurityGroup", "ec2:DeleteSecurityGroup", "ec2:AuthorizeSecurityGroupIngress", "ec2:AuthorizeSecurityGroupEgress", "ec2:RevokeSecurityGroupIngress", "ec2:RevokeSecurityGroupEgress", "ec2:ModifySecurityGroupRules", "ec2:CreateTags", "ec2:DeleteTags", "ec2:CreateVpcEndpoint", "ec2:ModifyVpcEndpoint", "ec2:DeleteVpcEndpoints"], Resource = "*", Condition = { StringEquals = { "aws:RequestedRegion" = var.region } } }
+    { Effect = "Allow", Action = ["ec2:CreateSecurityGroup", "ec2:DeleteSecurityGroup", "ec2:AuthorizeSecurityGroupIngress", "ec2:AuthorizeSecurityGroupEgress", "ec2:RevokeSecurityGroupIngress", "ec2:RevokeSecurityGroupEgress", "ec2:ModifySecurityGroupRules", "ec2:CreateTags", "ec2:DeleteTags", "ec2:CreateVpcEndpoint", "ec2:ModifyVpcEndpoint", "ec2:DeleteVpcEndpoints"], Resource = "*", Condition = { StringEquals = { "aws:RequestedRegion" = var.region } } },
+    # Secrets Manager validates customer-key access even without a secret value.
+    # Allow only this deployment's key, via Secrets Manager, for its source secret.
+    { Sid = "SourceSecretKeyValidation", Effect = "Allow", Action = ["kms:GenerateDataKey", "kms:Decrypt"], Resource = "${local.arn}:kms:${var.region}:${local.account}:key/*", Condition = {
+      StringEquals = { "aws:ResourceTag/Deployment" = local.name, "kms:ViaService" = "secretsmanager.${var.region}.amazonaws.com" },
+      ArnLike      = { "kms:EncryptionContext:SecretARN" = "${local.arn}:secretsmanager:${var.region}:${local.account}:secret:${local.name}/sql-source-??????" }
+    } }
   ]
 }
 resource "aws_iam_policy" "apply" {

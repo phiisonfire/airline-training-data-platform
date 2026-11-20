@@ -15,6 +15,23 @@ variables {
 run "controller_security" {
   command = apply
   assert {
+    condition = alltrue([for statement in local.apply_statements :
+      try(contains(statement.Action, "glue:CreateDatabase"), false) ?
+      contains(statement.Action, "glue:TagResource") && contains(statement.Action, "glue:UntagResource") : true
+    ])
+    error_message = "Glue database provisioning must support default tag creation and removal."
+  }
+  assert {
+    condition = length([for statement in local.apply_statements : statement if try(statement.Sid, "") == "SourceSecretKeyValidation" &&
+      try(toset(statement.Action) == toset(["kms:GenerateDataKey", "kms:Decrypt"]), false) &&
+      try(statement.Resource == "arn:aws:kms:us-east-1:123456789012:key/*", false) &&
+      try(statement.Condition.StringEquals["aws:ResourceTag/Deployment"] == "atdp-dev-airline-a", false) &&
+      try(statement.Condition.StringEquals["kms:ViaService"] == "secretsmanager.us-east-1.amazonaws.com", false) &&
+      try(statement.Condition.ArnLike["kms:EncryptionContext:SecretARN"] == "arn:aws:secretsmanager:us-east-1:123456789012:secret:atdp-dev-airline-a/sql-source-??????", false)
+    ]) == 1
+    error_message = "Secret key validation must be scoped to the deployment key, service and source secret."
+  }
+  assert {
     condition     = alltrue([for bucket in aws_s3_bucket.control : bucket.force_destroy]) && aws_kms_key.control.deletion_window_in_days == 7
     error_message = "Lab resources must support destructive cleanup with minimal deletion delays."
   }
