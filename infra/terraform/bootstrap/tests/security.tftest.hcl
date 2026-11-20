@@ -18,9 +18,10 @@ run "controller_security" {
     condition = alltrue([for role in ["plan", "apply", "verify"] : anytrue([
       for statement in jsondecode(aws_iam_role_policy.refresh[role].policy).Statement :
       try(contains(statement.Action, "s3:GetAccelerateConfiguration"), false) &&
+      try(contains(statement.Action, "s3:GetReplicationConfiguration"), false) &&
       statement.Resource == "arn:aws:s3:::atdp-dev-airline-a-123456789012-us-east-1"
     ])])
-    error_message = "Refresh roles must read acceleration metadata on the deployment bucket."
+    error_message = "Refresh roles must read acceleration and replication metadata on the deployment bucket."
   }
   assert {
     condition = alltrue([for statement in local.apply_statements :
