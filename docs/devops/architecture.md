@@ -29,7 +29,7 @@ Không cần Glue Spark, EMR, MWAA hoặc Kafka để đổi tên bốn cột.
 | Concern | Implementation | Ownership / failure boundary |
 |---|---|---|
 | Source | Existing SQL Server test table | Không tạo RDS/SQL login; source owner cấp SELECT/TLS/connectivity |
-| Extraction/compute | Lambda 3.12, published version/live alias | Timeout 180s, max_rows, concurrency=1; workload lớn chuyển worker sau benchmark |
+| Extraction/compute | Lambda 3.12, published version/live alias | Timeout 180s, max_rows, shared account concurrency pool (không reservation/cap riêng); workload lớn chuyển worker sau benchmark |
 | Storage | Dedicated S3 bucket per tenant, versioning, KMS, TLS-only, no public access | Raw/curated/quarantine/manifests/query-results có prefixes riêng; không mặc định physical hardware isolation |
 | Orchestration | Step Functions Standard | Execution name là run_id; service retries; failures cần investigation/redrive |
 | Scheduling | EventBridge Scheduler + encrypted SQS DLQ | Schedule disabled mặc định; DLQ chỉ cho failure khi dispatch, không cho mọi Lambda/business failure |

@@ -17,6 +17,15 @@ run "controller_security" {
   assert {
     condition = alltrue([for role in ["plan", "apply", "verify"] : anytrue([
       for statement in jsondecode(aws_iam_role_policy.refresh[role].policy).Statement :
+      try(contains(statement.Action, "glue:GetTags"), false) &&
+      try(contains(statement.Resource, "arn:aws:glue:us-east-1:123456789012:database/atdp_dev_airline_a"), false) &&
+      try(!contains(statement.Resource, "*"), false)
+    ])])
+    error_message = "Refresh roles must read tags on deployment Glue resources."
+  }
+  assert {
+    condition = alltrue([for role in ["plan", "apply", "verify"] : anytrue([
+      for statement in jsondecode(aws_iam_role_policy.refresh[role].policy).Statement :
       try(contains(statement.Action, "s3:GetAccelerateConfiguration"), false) &&
       try(contains(statement.Action, "s3:GetReplicationConfiguration"), false) &&
       statement.Resource == "arn:aws:s3:::atdp-dev-airline-a-123456789012-us-east-1"

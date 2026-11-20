@@ -83,3 +83,5 @@ Khởi tạo 2026-11-17; cập nhật 2026-11-19. Đọc README và docs/devops/
 - Bootstrap S3 migration: template infra/terraform/bootstrap/backend.tf.example; active backend.tf ignored, local-first init trước khi bucket tồn tại. Migration remote chưa chạy.
 
 - Single-VPC runbook: docs/runbooks/single-vpc-lab.md; two-VPC proposal SUPERSEDED. Deploy network trước platform, cleanup workloads rồi network trước bootstrap. CI không quản lý network root.
+
+- 2026-11-20 ACCEPTED/IMPLEMENTED: lab worker bỏ Lambda reserved concurrency (`-1`), dùng shared account pool vì account quota hiện tại 10 không cho reserve 1. Không có per-function concurrency cap; giữ schedule disabled và operator chỉ chạy một workflow tại một thời điểm. AWS apply thay đổi này UNVERIFIED.

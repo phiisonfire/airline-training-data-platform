@@ -213,3 +213,5 @@ Không tạo SQL/application compute. Same-owner lab, không independent provide
 network hoặc strict tenant isolation; full business requirements giữ nguyên.
 Existing two-VPC state không tự migrate: phải reviewed migration/cleanup plan.
 Bootstrap đã deploy không cần thay đổi; network/platform AWS runtime UNVERIFIED.
+
+- 2026-11-20 ACCEPTED/IMPLEMENTED: lab worker bỏ Lambda reserved concurrency (`-1`), dùng shared account pool vì account quota hiện tại 10 không cho reserve 1. Không có per-function concurrency cap; giữ schedule disabled và operator chỉ chạy một workflow tại một thời điểm. AWS apply thay đổi này UNVERIFIED.

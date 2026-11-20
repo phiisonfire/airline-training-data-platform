@@ -60,3 +60,9 @@ relevant paths và validation thực tế. Không nhập lịch sử code/tests 
 - Network contract v2 đổi source IDs thành shared vpc_id + application_subnet_ids/database_subnet_ids/database_sql_security_group_id; platform_inputs vẫn tương thích deployment schema v1. Same-owner lab, không còn mô phỏng independent airline/provider network ownership. Bootstrap không đổi; existing two-VPC deployment phải review migration/cleanup, không tự migrate state.
 - Paths: infra/terraform/network/{main.tf,tests/boundaries.tftest.hcl}, tests/infra/test_ci_contract.py, config/{README.md,examples/devops-lab.json}, infra/terraform/platform/main.tf, docs/runbooks/{single-vpc-lab.md,two-vpc-lab.md,devops-lab.md,devops-lab-cleanup.md}, docs/devops/architecture.md, infra/README.md và memory.
 - Validation: network validate và 4 mock runs pass (single VPC/subnet roles/AZ/SQL ingress/contract/custom port, invalid CIDR/AZ rejection). Terraform formatting/git diff checks pass. Python infra topology guard kiểm tra không peering/Internet egress; initial parser assertion sửa để xử lý HCL quoted labels. Không apply/migrate AWS, không đọc credentials/state; actual SQL/TLS/negative access UNVERIFIED.
+
+## 2026-11-20 — Bỏ Lambda reservation trong lab
+
+- ACCEPTED/IMPLEMENTED theo user: worker dùng reserved_concurrent_executions=-1, shared account pool, thay reservation=1 bị AWS từ chối với account concurrency quota 10. Không có function-level cap; giữ schedule disabled và manual runs từng workflow. Không suy ra concurrent-writer guarantee.
+- Paths: infra/terraform/modules/data_plane/main.tf, docs/devops/architecture.md, docs/ai-context/{ARCHITECTURE,CURRENT_STATE}.md.
+- Validation: data_plane Terraform mock test 1 passed; Terraform fmt và git diff --check pass. Không apply AWS; deployment mới UNVERIFIED.

@@ -171,16 +171,17 @@ resource "aws_iam_role_policy" "worker" {
   ] })
 }
 resource "aws_lambda_function" "extract" {
-  function_name                  = "${var.name}-extract"
-  role                           = aws_iam_role.worker.arn
-  filename                       = var.lambda_zip
-  source_code_hash               = filebase64sha256(var.lambda_zip)
-  handler                        = "pipelines.sql_to_s3.handler.handler"
-  runtime                        = "python3.12"
-  architectures                  = ["x86_64"]
-  timeout                        = 180
-  memory_size                    = 512
-  reserved_concurrent_executions = 1
+  function_name    = "${var.name}-extract"
+  role             = aws_iam_role.worker.arn
+  filename         = var.lambda_zip
+  source_code_hash = filebase64sha256(var.lambda_zip)
+  handler          = "pipelines.sql_to_s3.handler.handler"
+  runtime          = "python3.12"
+  architectures    = ["x86_64"]
+  timeout          = 180
+  memory_size      = 512
+  # Lab uses the account shared pool; no function-level concurrency cap.
+  reserved_concurrent_executions = -1
   publish                        = true
   logging_config {
     log_format = "JSON"

@@ -142,7 +142,7 @@ resource "aws_iam_role_policy" "refresh" {
     { Effect = "Allow", Action = ["secretsmanager:DescribeSecret", "secretsmanager:GetResourcePolicy"], Resource = "${local.arn}:secretsmanager:${var.region}:${local.account}:secret:${local.name}/*" },
     { Effect = "Allow", Action = ["sqs:GetQueueAttributes", "sqs:ListQueueTags"], Resource = "${local.arn}:sqs:${var.region}:${local.account}:${local.name}-*" },
     { Effect = "Allow", Action = ["sns:GetTopicAttributes", "sns:ListTagsForResource"], Resource = "${local.arn}:sns:${var.region}:${local.account}:${local.name}-*" },
-    { Effect = "Allow", Action = ["glue:GetDatabase", "glue:GetTable"], Resource = ["${local.arn}:glue:${var.region}:${local.account}:catalog", "${local.arn}:glue:${var.region}:${local.account}:database/${replace(local.name, "-", "_")}", "${local.arn}:glue:${var.region}:${local.account}:table/${replace(local.name, "-", "_")}/*"] },
+    { Effect = "Allow", Action = ["glue:GetDatabase", "glue:GetTable", "glue:GetTags"], Resource = ["${local.arn}:glue:${var.region}:${local.account}:catalog", "${local.arn}:glue:${var.region}:${local.account}:database/${replace(local.name, "-", "_")}", "${local.arn}:glue:${var.region}:${local.account}:table/${replace(local.name, "-", "_")}/*"] },
     { Effect = "Allow", Action = ["athena:GetWorkGroup", "athena:ListTagsForResource"], Resource = "${local.arn}:athena:${var.region}:${local.account}:workgroup/${local.name}" }
   ] })
 }
