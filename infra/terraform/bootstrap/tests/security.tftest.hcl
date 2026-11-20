@@ -15,6 +15,13 @@ variables {
 run "controller_security" {
   command = apply
   assert {
+    condition = alltrue([for role in ["plan", "apply"] : anytrue([
+      for statement in concat(jsondecode(aws_iam_role_policy.refresh[role].policy).Statement, flatten([for policy in aws_iam_policy.apply : jsondecode(policy.policy).Statement if role == "apply"])) :
+      try(statement.Action == "states:ValidateStateMachineDefinition" && statement.Resource == "*" && statement.Condition.StringEquals["aws:RequestedRegion"] == var.region, false)
+    ])])
+    error_message = "Both Plan and Apply roles require regional ASL validation."
+  }
+  assert {
     condition = anytrue([for statement in local.apply_statements :
       try(statement.Sid == "DeleteDeploymentDatabaseFunctions" && statement.Action == "glue:DeleteDatabase" && statement.Resource == "arn:aws:glue:us-east-1:123456789012:userDefinedFunction/atdp_dev_airline_a/*", false)
       ]) && anytrue([for statement in local.apply_statements :

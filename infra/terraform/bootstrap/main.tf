@@ -133,7 +133,7 @@ resource "aws_iam_role_policy" "state_write" {
 resource "aws_iam_role_policy" "refresh" {
   for_each = toset(["plan", "apply", "verify"])
   role     = aws_iam_role.build[each.key].id
-  policy = jsonencode({ Version = "2012-10-17", Statement = [
+  policy = jsonencode({ Version = "2012-10-17", Statement = concat([
     { Effect = "Allow", Action = ["ec2:Describe*", "kms:DescribeKey", "kms:GetKeyPolicy", "kms:GetKeyRotationStatus", "kms:ListResourceTags", "kms:ListAliases", "logs:Describe*", "logs:ListTagsForResource", "cloudwatch:DescribeAlarms", "cloudwatch:GetDashboard", "cloudwatch:ListTagsForResource", "scheduler:GetSchedule", "scheduler:ListTagsForResource", "sts:GetCallerIdentity"], Resource = "*" },
     { Effect = "Allow", Action = ["s3:GetBucket*", "s3:GetAccelerateConfiguration", "s3:GetReplicationConfiguration", "s3:GetEncryptionConfiguration", "s3:GetLifecycleConfiguration", "s3:ListBucket"], Resource = "${local.arn}:s3:::${local.data_bucket}" },
     { Effect = "Allow", Action = ["iam:GetRole", "iam:GetRolePolicy", "iam:ListRolePolicies", "iam:ListAttachedRolePolicies", "iam:GetPolicy", "iam:GetPolicyVersion", "iam:ListPolicyVersions", "iam:ListRoleTags", "iam:ListPolicyTags"], Resource = ["${local.arn}:iam::${local.account}:role/${local.name}-*", "${local.arn}:iam::${local.account}:policy/${local.name}-*"] },
@@ -144,5 +144,8 @@ resource "aws_iam_role_policy" "refresh" {
     { Effect = "Allow", Action = ["sns:GetTopicAttributes", "sns:ListTagsForResource"], Resource = "${local.arn}:sns:${var.region}:${local.account}:${local.name}-*" },
     { Effect = "Allow", Action = ["glue:GetDatabase", "glue:GetTable", "glue:GetTags"], Resource = ["${local.arn}:glue:${var.region}:${local.account}:catalog", "${local.arn}:glue:${var.region}:${local.account}:database/${replace(local.name, "-", "_")}", "${local.arn}:glue:${var.region}:${local.account}:table/${replace(local.name, "-", "_")}/*"] },
     { Effect = "Allow", Action = ["athena:GetWorkGroup", "athena:ListTagsForResource"], Resource = "${local.arn}:athena:${var.region}:${local.account}:workgroup/${local.name}" }
-  ] })
+    ], each.key == "plan" ? [
+    # Provider validates ASL during planning, before any state machine exists.
+    { Effect = "Allow", Action = "states:ValidateStateMachineDefinition", Resource = "*", Condition = { StringEquals = { "aws:RequestedRegion" = var.region } } }
+  ] : []) })
 }
