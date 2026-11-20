@@ -64,3 +64,17 @@ def test_cdk_selection_fails_explicitly_not_falls_back(tmp_path, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["iac", "validate", "--config", str(path)])
     with pytest.raises(SystemExit, match="CDK adapter is not implemented"):
         main()
+
+
+def test_lab_network_has_no_peering_or_public_egress():
+    with Path("infra/terraform/network/main.tf").open() as source:
+        network = hcl2.load(source)
+    resources = {}
+    for block in network["resource"]:
+        for kind, definitions in block.items():
+            resources.setdefault(kind.strip('"'), {}).update(
+                {name: body for name, body in definitions.items() if name != "__is_block__"})
+    assert len(resources["aws_vpc"]) == 1
+    assert "for_each" not in next(iter(resources["aws_vpc"].values()))
+    assert not {"aws_vpc_peering_connection", "aws_route", "aws_internet_gateway",
+                "aws_nat_gateway", "aws_eip"}.intersection(resources)

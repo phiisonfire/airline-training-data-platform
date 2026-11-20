@@ -103,6 +103,13 @@ inspect dependencies, không xóa shared ENI/VPC. Nếu destroy lỗi giữa ch�
 state, sửa nguyên nhân và tạo destroy plan mới. Không tiếp tục bootstrap khi còn
 platform resources phụ thuộc control plane.
 
+## 3b. Cleanup network một VPC (nếu đã deploy)
+
+Sau platform: xóa SQL host/ENIs/storage tạo ngoài Terraform trong database/application subnets,
+rồi destroy root infra/terraform/network bằng owner, backend key network/<deployment>/terraform.tfstate.
+Xem [single-VPC cleanup](single-vpc-lab.md). Không xóa state bucket/bootstrap trước
+network. Nếu còn source/platform ENIs, xử lý dependency trước, không state rm.
+
 ## 4. Đưa bootstrap state về local trước khi xóa state bucket
 
 Nếu bootstrap vốn dùng local backend và chưa migrate S3, bỏ qua migration.

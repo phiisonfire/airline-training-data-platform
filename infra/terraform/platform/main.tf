@@ -6,7 +6,7 @@ terraform {
   }
 }
 variable "deployment" {
-  description = "Generated from the IaC-neutral deployment contract, no credentials"
+  description = "Platform subnet bindings from network_contract.platform_inputs; no application/database subnets or credentials"
   type = object({
     project             = string, environment = string, tenant_id = string, region = string,
     vpc_id              = string, subnet_ids = list(string), route_table_ids = list(string),

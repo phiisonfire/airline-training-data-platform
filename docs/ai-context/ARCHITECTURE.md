@@ -185,3 +185,31 @@ data/control/audit; secret recovery window=0, KMS deletion window=7. Chỉ lab.
 Destroy bằng operator (CI role cố ý deny tenant objects), platform trước bootstrap;
 migrate bootstrap backend S3 về local trước xóa bucket. Manual resources cần cleanup
 riêng. Không cam kết zero charges; actual destroy UNVERIFIED.
+
+### 2026-11-19 — Airline Source VPC / provider Platform VPC (SUPERSEDED)
+
+ACCEPTED/IMPLEMENTED lab topology: operator-owned root infra/terraform/network
+tạo hai VPC cùng account/Region từ một owner-selected /16, disjoint /20s, hai
+private /24 subnets mỗi phía ở hai AZ, peering và routes hai chiều. Source SQL SG
+chỉ SQL TCP từ platform subnet CIDRs. Không NAT/IGW/public IP/SQL instance.
+Network contract v1 handoff platform_inputs vào deployment schema v1, không phá
+input contract hiện có; source IDs/SG cho source owner, không CI platform ownership.
+State key network/<deployment>/terraform.tfstate riêng. Network deploy trước
+platform, destroy sau platform/source hosts và trước bootstrap. CIDR allowlist
+là subnet scope, chưa worker identity/cross-account/strict tenant isolation.
+DNS/TLS, SQL fixture, endpoint/network negative tests và actual deployment UNVERIFIED.
+
+### 2026-11-19 — Single-VPC lab (current)
+
+ACCEPTED/IMPLEMENTED: theo user, thay two-VPC topology bằng một operator-managed
+VPC, application/database/platform subnet groups, mỗi group hai private /24 ở
+hai AZ, các ranges /20 derive từ owner-selected /16. Không peering/custom peer
+routes/Internet egress. Subnet group là placement/routing, không tự là access
+boundary; SQL SG chỉ SQL port từ platform subnet CIDRs, chưa worker-only identity.
+Network output contract v2: shared vpc_id, application_subnet_ids, database_subnet_ids,
+database_sql_security_group_id, platform_inputs; deployment schema vẫn v1. Root
+platform chỉ nhận platform subnets/route tables và database CIDR, không app/DB hosts.
+Không tạo SQL/application compute. Same-owner lab, không independent provider/airline
+network hoặc strict tenant isolation; full business requirements giữ nguyên.
+Existing two-VPC state không tự migrate: phải reviewed migration/cleanup plan.
+Bootstrap đã deploy không cần thay đổi; network/platform AWS runtime UNVERIFIED.

@@ -14,7 +14,7 @@ if __name__ == "__main__":
     run(sys.executable, "-m", "pytest", "-q")
     terraform = os.environ.get("TERRAFORM", "/tmp/atdp-tools/terraform")
     run(terraform, "fmt", "-check", "-recursive", "infra/terraform")
-    for root in ["bootstrap", "platform", "modules/data_plane"]:
+    for root in ["bootstrap", "network", "platform", "modules/data_plane"]:
         directory = str(Path("infra/terraform") / root)
         run(terraform, f"-chdir={directory}", "init", "-backend=false", "-input=false",
             "-lockfile=readonly")

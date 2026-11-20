@@ -1,0 +1,7 @@
+region             = "REPLACE_REGION"
+name               = "atdp-dev-airline-a"
+tenant_id          = "airline-a"
+# Example only: owner must choose unused address space before apply.
+network_cidr       = "10.80.0.0/16"
+availability_zones = ["REPLACE_AZ_A", "REPLACE_AZ_B"]
+sql_port           = 1433

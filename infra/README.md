@@ -14,3 +14,7 @@ và data_plane module. AWS deployment UNVERIFIED.
 
 Chưa chọn account/Region/budget/isolation tier thật. Chỉ plan/apply trong authorization;
 IaC code không phải bằng chứng resources đã tồn tại hoặc production-ready.
+
+- [Single-VPC lab network](terraform/network/main.tf): operator-owned VPC với
+  application/database/platform private subnets và SQL SG. Deploy trước platform,
+  cleanup sau workloads; [runbook](../docs/runbooks/single-vpc-lab.md).

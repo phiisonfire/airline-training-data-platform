@@ -49,6 +49,13 @@ Initial deployment dùng một tenant/environment. Tạo controller/state/data p
 riêng cho tenant khác; dedicated account tier cần account bindings/principals
 riêng và negative-access drill, không chỉ đổi tenant_id trong một shared state.
 
+### Network lab một VPC
+
+Root operator `infra/terraform/network` tạo một VPC, application/database/platform
+private subnet groups. Platform config chỉ nhận platform_inputs từ network_contract
+v2. Xem [single-VPC runbook](single-vpc-lab.md) trước first platform release. SQL/app
+compute vẫn do owner cung cấp; subnet isolation cần SG rules, không peering.
+
 ## 3. Chuẩn bị reviewed configuration
 
 Copy `config/examples/devops-lab.json` sang `config/deployment.json`; thay toàn bộ

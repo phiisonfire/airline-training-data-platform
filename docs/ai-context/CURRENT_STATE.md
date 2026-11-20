@@ -1,13 +1,13 @@
 # CURRENT_STATE — AWS platform, DevOps milestone
 
-Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/ để chạy/học.
+Khởi tạo 2026-11-17; cập nhật 2026-11-19. Đọc README và docs/devops/ để chạy/học.
 
 ## Scope và bằng chứng
 
 - ACCEPTED: một platform trên AWS; Terraform trước, extension seam cho AWS CDK.
 - ACCEPTED: AWS CodePipeline/CodeBuild; business slice tạm là một SQL test table → mapping/filter → S3.
 - IMPLEMENTED trong repo: Python 3.12 snapshot pipeline, Terraform data plane/controller, CI buildspecs, local tests và learning docs.
-- Chưa deploy AWS; account/Region/budget/source endpoints/actual IAM/network/SQL integration: UNVERIFIED.
+- User báo bootstrap apply thành công: 48 resources, Singapore (ap-southeast-1). Platform/network mới, actual IAM/SQL integration và recovery: UNVERIFIED.
 - CDK adapter chưa implement; chọn cdk fail explicit, không fallback.
 - Qualification/seniority/two BI serving products/SQL qualification backfeed: DEFERRED trong milestone DevOps, full business scope giữ nguyên.
 - Không chuyển test/deployment results của mockgen sang repo này.
@@ -21,6 +21,7 @@ Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/
 - orchestration/sql-to-s3.asl.json: Step Functions definition dùng lại; Scheduler disabled mặc định.
 - contracts/devops/: snapshot v1 và IaC-neutral deployment JSON schema.
 - infra/terraform/bootstrap: state/artifacts/KMS, runtime boundary, CI roles/projects/pipeline và optional audit.
+- infra/terraform/network: 1 VPC, 6 private subnets/route tables (application/database/platform), SQL SG; operator state riêng.
 - infra/terraform/platform + modules/data_plane: per-tenant S3/Lambda/KMS/Secrets/network endpoints/Glue/Athena/CloudWatch/SNS/SQS.
 - ci/: check/package/plan/apply/verify, owner-only empty state initialization, CodeBuild definitions.
 - tests/: offline unit/contract/replay/isolation-binding/CI integrity tests; Terraform mock tests ở IaC roots/module.
@@ -33,7 +34,7 @@ Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/
 - Build/package/audit → saved plan → approval → exact plan apply → metadata/hash verify.
 - Plan bound source/ZIP/backend/boundary/TTL; encrypted artifacts, locked deps/providers.
 - Config deployment JSON chỉ non-secret reviewed refs; password nhập ngoài Terraform vào Secrets Manager.
-- Existing VPC/routes/source do owner cung cấp; Terraform tạo SG/S3 gateway/Secrets interface endpoints.
+- IMPLEMENTED: operator network root tạo 1 VPC, application/database/platform subnet groups ở 2 AZ; platform dùng output v2 bindings. SQL/app hosts do owner cung cấp.
 - Dedicated bucket/KMS/roles/log groups per tenant deployment là lab resource isolation, chưa strict account/admin isolation.
 - Central logging dùng chuẩn/view thống nhất; không copy data-bearing tenant logs vào shared store.
 - Optional account-wide CloudTrail chỉ khi dedicated lab account được xác nhận hoặc dùng approved existing audit.
@@ -80,3 +81,5 @@ Khởi tạo 2026-11-17; cập nhật 2026-11-18. Đọc README và docs/devops/
 4. Verify actual IAM/isolation/logging/alarms/recovery/cost; chỉ sau đó mở rộng business requirements.
 
 - Bootstrap S3 migration: template infra/terraform/bootstrap/backend.tf.example; active backend.tf ignored, local-first init trước khi bucket tồn tại. Migration remote chưa chạy.
+
+- Single-VPC runbook: docs/runbooks/single-vpc-lab.md; two-VPC proposal SUPERSEDED. Deploy network trước platform, cleanup workloads rồi network trước bootstrap. CI không quản lý network root.

@@ -8,7 +8,7 @@
   "vpc_id": "REPLACE_VPC_ID",
   "subnet_ids": ["REPLACE_PRIVATE_SUBNET_A", "REPLACE_PRIVATE_SUBNET_B"],
   "route_table_ids": ["REPLACE_PRIVATE_ROUTE_TABLE"],
-  "sql_cidr": "10.20.1.0/24",
+  "sql_cidr": "10.80.16.0/20",
   "sql_port": 1433,
   "source_schema": "devops",
   "source_table": "pilot_source",

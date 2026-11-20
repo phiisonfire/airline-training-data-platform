@@ -88,3 +88,13 @@ và tier của từng hãng vẫn là điều kiện trước production/custome
 - [CodeBuild Python runtimes](https://docs.aws.amazon.com/codebuild/latest/userguide/available-runtimes.html)
 - [CodePipeline Terraform reference architecture](https://github.com/aws-samples/terraform-aws-pipeline)
 - [SQL driver TLS](https://github.com/denisenkom/pytds)
+
+## Single-VPC lab network
+
+Root operator `infra/terraform/network` tạo một VPC, application/database/platform
+private subnet groups ở hai AZ (6 subnets), route tables riêng và SQL SG giới hạn
+TCP từ platform subnets. Không VPC Peering; dùng local routes, SG/IAM/SQL controls.
+Network contract v2 handoff platform_inputs tương thích deployment schema v1;
+app/SQL host do owner chuẩn bị. Không NAT/IGW/public SQL hoặc account isolation.
+CI platform chỉ quản lý workload/endpoints, không root network.
+[Runbook](../runbooks/single-vpc-lab.md) nêu deployment, migration và cleanup.
